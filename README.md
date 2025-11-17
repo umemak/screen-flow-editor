@@ -16,7 +16,7 @@
 
 - **開発環境**: https://3000-ic3xdpg35rjyzywn1v0bs-cbeee0f9.sandbox.novita.ai
 - **本番環境**: （デプロイ後に更新）
-- **GitHub**: （リポジトリ作成後に更新）
+- **GitHub**: https://github.com/umemak/screen-flow-editor
 
 ## 📊 データアーキテクチャ
 
