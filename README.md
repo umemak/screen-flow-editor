@@ -1,21 +1,164 @@
-```txt
-npm install
-npm run dev
+# 画面遷移図エディタ
+
+画面遷移図の作成に特化したビジュアルエディタです。画像をドラッグ&ドロップして配置し、画面間の遷移を視覚的に表現できます。
+
+## 🎯 プロジェクト概要
+
+- **名前**: 画面遷移図エディタ（Screen Flow Editor）
+- **目的**: UIデザイン・画面設計における画面遷移を視覚的に管理
+- **主な機能**: 
+  - 画像のドラッグ&ドロップによる画面追加
+  - 画面間の遷移線の作成
+  - キャンバスのパン・ズーム操作
+  - 全体俯瞰ビュー
+
+## 🌐 URL
+
+- **開発環境**: https://3000-ic3xdpg35rjyzywn1v0bs-cbeee0f9.sandbox.novita.ai
+- **本番環境**: （デプロイ後に更新）
+- **GitHub**: （リポジトリ作成後に更新）
+
+## 📊 データアーキテクチャ
+
+### データモデル
+
+#### Screens（画面）
+- `id`: 画面ID（主キー）
+- `name`: 画面名
+- `image_url`: 画像URL
+- `position_x`, `position_y`: キャンバス上の座標
+- `width`, `height`: 画面のサイズ
+- `created_at`, `updated_at`: タイムスタンプ
+
+#### Connections（遷移）
+- `id`: 遷移ID（主キー）
+- `source_screen_id`: 開始画面ID（外部キー）
+- `target_screen_id`: 終了画面ID（外部キー）
+- `label`: 遷移のラベル（オプション）
+- `created_at`: タイムスタンプ
+
+### ストレージサービス
+
+- **Cloudflare D1**: 画面メタデータと遷移情報を保存
+- **Cloudflare R2**: 画面画像をオブジェクトストレージに保存
+
+### データフロー
+
+1. ユーザーが画像をアップロード → R2に保存 → URLを取得
+2. 画面情報（名前、位置、画像URL）をD1に保存
+3. 画面間の遷移を作成 → Connectionsテーブルに保存
+4. クライアントは定期的にAPIから最新データを取得して描画
+
+## 📖 使い方
+
+### 画面の追加
+
+1. **ファイルから追加**: 「画面追加」ボタンをクリックして画像を選択
+2. **ドラッグ&ドロップ**: 画像ファイルを直接キャンバスにドロップ
+
+### 画面の操作
+
+- **移動**: 画面をドラッグして移動
+- **名前変更**: 画面名をダブルクリックして編集
+- **削除**: 画面にホバーして表示される×ボタンをクリック
+
+### 遷移の作成
+
+1. 「接続モード」ボタンをクリック
+2. 開始画面をクリック
+3. 終了画面をクリック
+4. ラベル（オプション）を入力
+
+### キャンバス操作
+
+- **パン**: 空白部分をドラッグして移動
+- **ズーム**: マウスホイールで拡大/縮小
+- **全体表示**: 「全体表示」ボタンですべての画面を画面内に収める
+
+## 🚀 デプロイ
+
+### 開発環境
+
+```bash
+# ビルド
+npm run build
+
+# ローカルでマイグレーション実行
+npm run db:migrate:local
+
+# PM2で起動
+pm2 start ecosystem.config.cjs
+
+# テスト
+curl http://localhost:3000
 ```
 
-```txt
-npm run deploy
+### 本番環境（Cloudflare Pages）
+
+```bash
+# D1データベース作成
+npx wrangler d1 create webapp-production
+
+# R2バケット作成（ローカルテスト用は自動作成）
+npx wrangler r2 bucket create webapp-images
+
+# 本番マイグレーション実行
+npm run db:migrate:prod
+
+# デプロイ
+npm run deploy:prod
 ```
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+## 💻 技術スタック
 
-```txt
-npm run cf-typegen
-```
+- **フレームワーク**: Hono v4.10.6
+- **ランタイム**: Cloudflare Workers
+- **データベース**: Cloudflare D1（SQLite）
+- **ストレージ**: Cloudflare R2
+- **フロントエンド**: Vanilla JavaScript + TailwindCSS
+- **ビルドツール**: Vite 6.4.1
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+## ✅ 実装済み機能
 
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-```
+- [x] 画面の追加（ファイル選択・D&D）
+- [x] 画面の移動・編集・削除
+- [x] 画面間の遷移線作成
+- [x] 遷移ラベルの編集
+- [x] キャンバスのパン・ズーム
+- [x] 全体俯瞰ビュー
+- [x] データの永続化（D1 + R2）
+
+## 🔜 未実装機能
+
+- [ ] 複数プロジェクトの管理
+- [ ] 画面のリサイズ
+- [ ] 遷移線のスタイル変更（色、太さ、点線など）
+- [ ] 画面のグループ化
+- [ ] エクスポート機能（PNG、JSON）
+- [ ] undo/redo機能
+- [ ] 複数人での同時編集
+
+## 🎨 推奨される次のステップ
+
+1. **プロジェクト管理機能の追加**
+   - 複数の画面遷移図を管理できるようにする
+   - プロジェクト一覧ページの作成
+
+2. **UIの改善**
+   - 画面のリサイズハンドル追加
+   - ミニマップの追加
+   - グリッドスナップ機能
+
+3. **コラボレーション機能**
+   - 共有リンクの生成
+   - コメント機能
+   - 変更履歴の表示
+
+4. **エクスポート機能**
+   - PNG画像として保存
+   - JSON形式でデータエクスポート
+   - Figmaプラグインとの連携
+
+## 📝 最終更新日
+
+2025-11-17
